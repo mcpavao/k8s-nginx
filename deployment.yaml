@@ -12,6 +12,10 @@ spec:
       labels:
         app: nginx
     spec:
+      volumes:
+        - name: html
+          configMap:
+            name: nginx-index
       containers:
         - name: nginx
           image: nginx:1.27
@@ -29,3 +33,6 @@ spec:
               port: 80
             initialDelaySeconds: 10
             periodSeconds: 10
+          volumeMounts:
+            - name: html
+              mountPath: /usr/share/nginx/html

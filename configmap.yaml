@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-index
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html>
+      <head><title>k8s-nginx</title></head>
+      <body>
+        <h1>Servido a partir de um ConfigMap</h1>
+        <p>Conteudo injetado no pod sem rebuild da imagem.</p>
+        <p>by Mateus Pavao para teste</p>
+      </body>
+    </html>
