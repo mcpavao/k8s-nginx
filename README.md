@@ -1,17 +1,21 @@
 # k8s-nginx
 
-Deployment e Service do nginx em Kubernetes, executado localmente em cluster kind.
+Deployment, Service, ConfigMap e Ingress do nginx em Kubernetes, executado localmente em cluster kind.
 
 ## Como rodar
 
 ```bash
-kind create cluster --name k8s-nginx
-kubectl apply -f deployment.yaml
-kubectl apply -f service.yaml
-kubectl port-forward service/nginx 8080:80
+kind create cluster --name k8s-nginx --config kind-config.yaml
+
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.15.1/deploy/static/provider/kind/deploy.yaml
+
+kubectl wait --namespace ingress-nginx --for=condition=ready pod \
+  --selector=app.kubernetes.io/component=controller --timeout=120s
+
+kubectl apply -f configmap.yaml -f deployment.yaml -f service.yaml -f ingress.yaml
 ```
 
-Acesse `http://localhost:8080`. Para remover: `kind delete cluster --name k8s-nginx`.
+Acesse `http://localhost`. Para remover: `kind delete cluster --name k8s-nginx`.
 
 ## Decisões
 
@@ -23,6 +27,4 @@ Acesse `http://localhost:8080`. Para remover: `kind delete cluster --name k8s-ng
 
 **Service para endereço estável.** Pods são efêmeros e o IP muda a cada recriação. O Service localiza os pods por label, não por lista de IPs, e por isso continua funcionando enquanto eles vão e vêm.
 
-**Readiness e liveness.** Readiness controla se o pod entra nos endpoints do Service; liveness reinicia o container travado. Os períodos são assimétricos de propósito: readiness verifica com mais frequência porque o custo de errar é baixo, liveness é mais conservadora porque uma probe agressiva pode reiniciar pods saudáveis sob carga.
-
-**Limitação conhecida.** As duas probes apontam para o mesmo endpoint. Em produção isso é questionável: a liveness deveria verificar algo mais profundo, senão só adiciona risco de reinício sem detectar nada que a readiness já não detecte.
+**Readiness e liveness.** Readiness controla se o pod entra nos endpoints do Service; liveness
