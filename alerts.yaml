@@ -1,0 +1,27 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: nginx-alerts
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  groups:
+    - name: nginx
+      rules:
+        - alert: NginxReplicasUnavailable
+          expr: kube_deployment_status_replicas_available{namespace="default", deployment="nginx"} < 2
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Deployment nginx com menos replicas que o desejado"
+            description: "Ha menos de 2 replicas disponiveis ha mais de 2 minutos."
+        - alert: NginxDown
+          expr: kube_deployment_status_replicas_available{namespace="default", deployment="nginx"} == 0
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Deployment nginx sem nenhuma replica disponivel"
+            description: "Todas as replicas cairam e nao estao disponiveis."
