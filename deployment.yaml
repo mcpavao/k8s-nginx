@@ -16,11 +16,15 @@ spec:
         - name: html
           configMap:
             name: nginx-index
+        - name: conf
+          configMap:
+            name: nginx-conf
       containers:
         - name: nginx
           image: nginx:1.27
           ports:
             - containerPort: 80
+            - containerPort: 8080
           readinessProbe:
             httpGet:
               path: /
@@ -36,3 +40,12 @@ spec:
           volumeMounts:
             - name: html
               mountPath: /usr/share/nginx/html
+            - name: conf
+              mountPath: /etc/nginx/conf.d
+        - name: exporter
+          image: nginx/nginx-prometheus-exporter:1.3.0
+          args:
+            - --nginx.scrape-uri=http://localhost:8080/stub_status
+          ports:
+            - containerPort: 9113
+              name: metrics
