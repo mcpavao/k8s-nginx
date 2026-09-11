@@ -28,3 +28,5 @@ Acesse `http://localhost`. Para remover: `kind delete cluster --name k8s-nginx`.
 **Service para endereço estável.** Pods são efêmeros e o IP muda a cada recriação. O Service localiza os pods por label, não por lista de IPs, e por isso continua funcionando enquanto eles vão e vêm.
 
 **Readiness e liveness.** Readiness controla se o pod entra nos endpoints do Service; liveness
+
+**Regras de alerta com severidades separadas.** Duas regras em vez de uma: `NginxReplicasDegraded` (warning, `for: 2m`) para capacidade reduzida, e `NginxDown` (critical, `for: 1m`) para serviço indisponível. A cláusula `for` evita que um rolling update normal dispare alerta, já que a contagem de réplicas cai por alguns segundos durante a substituição dos pods. O `for` menor no alerta crítico reflete que a espera custa mais caro quando o serviço está fora do ar.
